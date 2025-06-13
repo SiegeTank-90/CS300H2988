@@ -1,10 +1,10 @@
 #ifndef _Course_HPP_
 #define _Course_HPP_
 
-#include <iostream>
-#include <vector>
-#include <string>
 #include <algorithm>
+#include <iostream>
+#include <string>
+#include <vector>
 
 using namespace std;
 
@@ -85,14 +85,19 @@ struct Node
         Course data;
         Node *left;
         Node *right;
+        int height; // marker to build a balanced tree to increase search times. 
+
 
         Node () {
                 this->left = nullptr;
                 this->right = nullptr;
+                this->height = 1;
+                this->data = Course();
         }
         Node(Course new_data){
             this->left = nullptr;
             this->right = nullptr;
+            this->height = 1;
             data = new_data;
         }
     };
@@ -100,20 +105,29 @@ struct Node
     class BinaryCourseTree {
 
     private:
-        void addNode(Node* node, Course nCourse);
+        Node* addNode(Node *node, Course nCourse);
         void InOrderSortPrint(Node* node);
         vector<string> nDegreePlan;
         vector<string> nCourseList;
 
-
+        //Balancing Helper Functions 
+        int getheight(Node *lowerLevelNode);
+        int getBalance(Node *ancestorNode);
+        Node *rightRotate(Node *y);
+        Node *leftRotate(Node *x);
+        
     public:
-        Node* root = nullptr;
+        Node *root = nullptr;
         void Insert(Course nCourse);
         Course FindCourse(string course_Id);
+
+
+
         //Degree functions
         void ChooseDegree(string course_Id, BinaryCourseTree nCourseCatalog);
         void CompareDegreePlans(vector<string> nCourseTaken);
         void getAllCourseById(Node* node); // gets every course Id
+       
 
         //setters/getters
         vector<string> getIdList();
@@ -125,6 +139,7 @@ struct Node
 
 
 
+
     void BinaryCourseTree::setDegree(vector<string> newDegree) {
         this->nDegreePlan = newDegree;
     }
@@ -132,48 +147,126 @@ struct Node
     vector<string> BinaryCourseTree::getDegree() {
         return nDegreePlan;
     }
+    
+    int BinaryCourseTree::getheight(Node *lowerLevelNode) {
+        if (lowerLevelNode == NULL) {
+            return 0;
+        }
+        return lowerLevelNode->height;
+    }
 
+    int BinaryCourseTree::getBalance(Node *ancestorNode) {
+        if (ancestorNode == NULL)
+            return 0;
+        return getheight(ancestorNode->left) - getheight(ancestorNode->right);
+    }
+
+    inline Node* BinaryCourseTree::rightRotate(Node* y)
+    {
+        Node* x = y->left;
+        Node* T2 = x->right;
+
+        //perform rotation  (Look here for Rotational Shifts)
+        x->right = y;
+        y->left = T2;
+
+        //update heights
+        y->height = 1 + max(getheight(y->left), getheight(y->right));
+        x->height = 1 + max(getheight(x->left), getheight(x->right));
+
+        return x;
+    }
+
+    inline Node* BinaryCourseTree::leftRotate(Node* x)
+    {
+        Node* y = x->right;
+        Node* T2 = y->left;
+
+        //perform rotation (Look here for Rotational Shifts)
+        y->left = x;
+        x->right = T2;
+
+        //update heights
+        x->height = 1 + max(getheight(x->left), getheight(x->right));
+        y->height = 1 + max(getheight(y->left), getheight(y->right));
+
+        return y;
+    }
+   
 
     void BinaryCourseTree::Insert(Course nCourse) {
 
-        // insert node at null if node is empty
-        if (root == nullptr) {
-            root = new Node(nCourse);
-        }
-        else {
-            //**Continue donw branches if root is full
-            this->addNode(root, nCourse);
-        }
+           
+            //**Continue down branches if root is full
+            root =  addNode(root, nCourse);
+
     };
 
-    void BinaryCourseTree::addNode(Node* node, Course new_Course) {
+   
+
+
+    Node* BinaryCourseTree::addNode(Node *node, Course new_Course) {
+
+
+        // insert node at null if node is empty
+        if (node == NULL)  {
+            return (new Node(new_Course));
+         }
 
         // if new course is smaller than left current node
-
-        if (node != nullptr && node->data.id.compare(new_Course.id) > 0) {
+        if (node->data.id.compare(new_Course.id) < 0) {
             // if left node is empty insert node there.
-            if (node->left == nullptr) {
-                node->left = new Node(new_Course);
-                return;
-                // else left node is full check that node
-            }
-            else {
-                this->addNode(node->left, new_Course);
-            }
+         
+                node->left = addNode(node->left, new_Course);
+         
             // if new course is larger than current node
         }
-        else if (node != nullptr && node->data.id.compare(new_Course.id) < 0) {
+        else if (node->data.id.compare(new_Course.id) > 0) {
             // if right node is empty insert node there
-            if (node->right == nullptr) {
-                node->right = new Node(new_Course);
-                return;
-                // else right node is full then check versus that node
-            }
-            else {
-                this->addNode(node->right, new_Course);
-            }
+         
+                node->right = addNode(node->right, new_Course);  
         }
-        //**TEST PRINTS
+        else {
+            return node;
+        }
+        
+        // update hieght of this ancestor base on nodes below
+       
+          node->height = 1 + max(getheight(node->left), getheight(node->right));
+  
+        int balance = getBalance(node);
+        //decide rotation case
+        if (balance > 1) {
+
+            //Left Left Case
+            if (node->data.id.compare(node->left->data.id) < 0) {
+                return rightRotate(node);
+
+            /* Left Right Case  */
+            } else if (node->data.id.compare(node->left->data.id) > 0 ) {
+                node->left = leftRotate(node->left);
+                return rightRotate(node);
+
+            }
+
+        }
+        else if (balance < -1 ) {
+
+            // Right Right Case
+            if (node->data.id.compare(node->right->data.id) > 0) {
+                return leftRotate(node);
+
+                } /* Right Left Case  */
+            else if (node->data.id.compare(node->right->data.id) < 0) {
+                node->right = rightRotate(node->right);
+               return leftRotate(node);
+
+            }
+
+        }
+
+        return node;
+
     }
 
     void BinaryCourseTree::PrintAll() {
@@ -190,11 +283,8 @@ struct Node
 
         if (node != nullptr) {
             // left to right order, recursively
-            // If left go left
             InOrderSortPrint(node->left);
-            // if no left print
             node->data.PrintCourse();
-            // if right go right
             InOrderSortPrint(node->right);
         }
 
@@ -229,16 +319,16 @@ Course BinaryCourseTree::FindCourse(string course_Id) {
 
     // while not empty, search down tree
     while ( current != nullptr) {
-        if (current->data.id.compare(course_Id) == 0) {
+        if (course_Id.compare(current->data.getId()) == 0) {
             return current->data;
         // if ID is smaller go left otherwise go right.
-        }else if (course_Id.compare(current->data.id) <0 ){
+        }
+        if (course_Id.compare(current->data.getId()) > 0 ){
             current = current->left;
-        } else {
+        }if (course_Id.compare(current->data.getId()) < 0 ) {
             current = current->right;
         }
     }
-    cout << "Course Not Found;" << endl;
 
      // No data is found return empty Coursefile
      Course NotFound;
@@ -248,7 +338,7 @@ Course BinaryCourseTree::FindCourse(string course_Id) {
 void BinaryCourseTree::ChooseDegree(string course_Id, BinaryCourseTree dataCatalog) {
 
 
-    vector<string> PreReqList = {}; // No duplicates list
+    vector<string> PreReqList = {}; // validated duplicates list
     vector<string> PreReqValdiationList = {}; //entries to be validated before entry
     int PreReqListPos = 0;
     Course currCourse = dataCatalog.FindCourse(course_Id);
@@ -279,7 +369,7 @@ void BinaryCourseTree::ChooseDegree(string course_Id, BinaryCourseTree dataCatal
     this->nDegreePlan = PreReqList;
 }
 
-void BinaryCourseTree::PrintDegree() {
+void BinaryCourseTree::PrintDegree() { //Prints every degree program
 
       
     for (unsigned i = 0; i < this->nDegreePlan.size(); i++) {
@@ -295,7 +385,7 @@ void BinaryCourseTree::CompareDegreePlans(vector<string> nCourseTaken) {
     vector<string> RemainingCourse = this->nDegreePlan;// Making a copy of degree plan as not to manipulate orignal choice. 
      for (unsigned i = 0; i < nCourseTaken.size(); i++) {
 
-        auto FindDups = find(RemainingCourse.begin(),RemainingCourse.end(), nCourseTaken.at(i)); // find 
+        auto FindDups = find(RemainingCourse.begin(),RemainingCourse.end(), nCourseTaken.at(i)); // find duplicates
 
         if (FindDups != RemainingCourse.end()) { // 
             RemainingCourse.erase(FindDups);

@@ -1,7 +1,7 @@
 CSCI100,Introduction to Computer Science
 CSCI101,Introduction to Programming in C++,CSCI100
 CSCI200,Data Structures,CSCI101
-MATH201,Discrete Mathematics, MATH101
+MATH201,Discrete Mathematics,MATH101
 CSCI300,Introduction to Algorithms,CSCI200,MATH201
 CSCI301,Advanced Programming in C++,CSCI101
 CSCI350,Operating Systems,CSCI300
@@ -9,12 +9,12 @@ CSCI400,Large Software Development,CSCI301,CSCI350
 ENGE100,Foundation of Engnieering
 ENGE121,Introduction to Engnieering Design
 ENGE200,Engineering Practices and Principles,ENGE100
-ENGE300,Professionlism in Engneering,ENGE121,ENGE150
-ENGE270,Engineering Problems Solving with Data,ENGE121,MATH201
-ENGE150,Exploring Engineering Disciplines
-ENGE303,Engineering Ethics and Golbal Issues,ENGE300
+ENGE300,Professionlism in Engneering,ENGE270,ENGE150
+ENGE270,Engineering Problems Solving with Data,ENGE200,MATH201
+ENGE150,Exploring Engineering Disciplines,ENGE121
+ENGE400,Engineering Ethics and Golbal Issues,ENGE300
 MATH101,College Algebra
 MATH120,Calculus 1
 MATH310,Introduction to Mathematical Proofs,MATH241
-MATH241,Calculus 3,MATH200
+MATH241,Calculus 3,MATH200,MATH201
 MATH200,Calculus 2,MATH120

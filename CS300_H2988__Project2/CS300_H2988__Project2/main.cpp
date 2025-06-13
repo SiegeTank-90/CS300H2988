@@ -75,7 +75,7 @@ int main() {
                 cout << endl;
                 FoundCourse = CourseCatalog.FindCourse(findCourseID);
                 
-                if (!FoundCourse.id.empty()) {
+                if (!(FoundCourse.getId() == "")) {
                     // Print Methods apart of course
                     FoundCourse.PrintCourse();
                     if (FoundCourse.PreReq.size() == 0 ){
@@ -135,7 +135,7 @@ int main() {
                 }
                 if (DegChoice == '3') {
                     cout << endl << "\t Engineering Degree Plan" << endl;
-                    CourseCatalog.ChooseDegree("ENGE403", CourseCatalog);
+                    CourseCatalog.ChooseDegree("ENGE400", CourseCatalog);
                     cout << "\t";
                     CourseCatalog.PrintDegree();
                     cout << endl << endl;
